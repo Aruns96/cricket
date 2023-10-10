@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+    <h1>Player Infromation</h1>
+<form onsubmit="saveToLocal(event)" >
+  <label for="name">Name</label>
+  <input type="text" id="name" name="name">
+  <br>
+  <label for="date">Date of Birth</label>
+  <input type="text" id ="date"name="date">
+  <br>
+  <label for="birth">Place of Birth</label>
+  <input type="text" id="birth" name="birth">
+  <br>
+  <label for="photo">Photo URL</label>
+  <input type="text" id="photo" name="photo">
+  <br>
+  <label for="matches">Matches</label>
+  <input type="text" id="matches" name="matches">
+  <br>
+  <label for="runs">Runs</label>
+  <input type="text" id="runs" name="runs">
+  <br>
+  <label for="wickets">Wickets</label>
+  <input type="text" id="wickets" name="wickets">
+  <br>
+  <button >submit </button>
+</form>
+<br>
+ <form onsubmit="getPlayer(event)">
+    <label for="search">Search</label>
+    <input type="text" id="search" name="search">
+    <button >Search </button>
+ </form>
+
+<div id="Items" >
+  
+</div>
+
+
+
+ 
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+ <script >
+   function saveToLocal(event){
+    event.preventDefault();
+    const name = event.target.name.value;
+    const date = event.target.date.value;
+    const birth = event.target.birth.value;
+    const photo = event.target.photo.value;
+    const matches = event.target.matches.value;
+    const runs = event.target.runs.value;
+    const wickets = event.target.wickets.value;
+
+
+   const obj = {
+    name,
+    date,
+    birth,
+    photo,
+    matches,
+    runs,
+    wickets
+   }
+
+    
+    axios.post("http://localhost:3000/player/add-data" ,obj)
+    .then(res =>{
+        console.log(res);
+        //showItems(res.data.newPlayerData);
+
+    })
+    .catch(e => {
+        console.log(e)
+        document.body.innerHTML=document.body.innerHTML + "<h3>error occured</h3>"
+    })
+    event.target.name.value = "";
+     event.target.date.value= "";
+     event.target.birth.value= "";
+     event.target.photo.value= "";
+     event.target.matches.value= "";
+     event.target.runs.value= "";
+     event.target.wickets.value= "";
+
+
+   }
+
+   function getPlayer(event) {
+    event.preventDefault();
+     const pName = document.getElementById("search").value;
+    
+
+    axios.post("http://localhost:3000/player/get-data",{pName}).then(res =>{
+           //console.log(res.data.playerData[0]);
+           
+            showItems(res.data.playerData[0]);
+           
+           
+        })
+        .catch(e=>console.log(e))
+        document.getElementById("search").value = "";
+   }
+
+
+   function showItems(player){
+
+   if(player===undefined){
+    console.log("player data not avialble");
+   }
+
+    const parentNode = document.getElementById("Items");
+    let childHTML = document.createElement("div");
+    childHTML.innerHTML =  `<div id=${player.id}>${player.name}--${player.date}--${player.birth}--${player.photo}--${player.matches}--${player.runs}--${player.wickets}<button >Edit</button></div>`
+    // let form = document.createElement("form");
+    // let labelname = document.createElement("label");
+    // labelname.innerText = "Name";
+    // let labelvalue = document.createElement("label");
+    // labelvalue.innerText = player.name;
+    // form.appendChild(labelname);
+    // form.appendChild(labelvalue);
+
+    childHTML.onclick = () => editUser(player)
+    // parentNode.innerHTML = parentNode.innerHTML+childHTML;
+    parentNode.appendChild(childHTML);
+    
+    
+
+   }
+   function editUser(player){
+    
+    console.log(player)
+    const {id,name,date,birth,photo,matches,runs,wickets} = player
+    document.getElementById("name").value = name;
+    document.getElementById("date").value = date;
+    document.getElementById("birth").value = birth;
+    document.getElementById("photo").value = photo;
+    document.getElementById("matches").value = matches;
+    document.getElementById("runs").value = runs;
+    document.getElementById("wickets").value = wickets;
+    removeUser(id);
+
+    axios.delete(`http://localhost:3000/player/edit-data/${id}`).then(res=>{
+       
+      
+    }).catch(e=>console.log(e));
+   }
+
+   function removeUser(playerId){
+    // const parentNode = document.getElementById("Items");
+    // console.log("parient",parentNode)
+    const nodeToDelete = document.getElementById(playerId);
+    
+    
+    nodeToDelete.remove();
+    // if(nodeToDelete){
+    //     parentNode.removeChild(nodeToDelete);
+    // }
+
+   }
+//    document.addEventListener("DOMContentLoaded",()=>{
+//         axios.get("http://localhost:3000/user/get-data").then(res =>{
+//            for(let i=0; i< res.data.allUser.length ;i++){
+//             showItems(res.data.allUser[i]);
+//            }
+//            console.log(res.data)
+//         })
+//         .catch(e=>console.log(e))
+//     })
+ </script> 
+</body>
+</html>
